@@ -1,0 +1,6 @@
+; $Id: CHANGELOG.txt,v 1.1.2.1 2009/02/25 00:54:48 jhedstrom Exp $
+
+DRUPAL-6--1-2, XXXX-XX-XX
+-------------------------
+- #380510 - Comment style now conforms to Drupal coding standards.
+- #380550 - Implements a better cleanup hook system.
