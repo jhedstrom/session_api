@@ -28,8 +28,27 @@ function session_api_get_sid() {
   }
 
   if (!is_numeric($_SESSION['session_api_id'])) {
-    // First, check if id exists in db.
-    $sid = db_result(db_query("SELECT sid FROM {session_api} WHERE session_id = '%s'", session_id()));
+    $sid = FALSE;
+
+    // First, check if the session ID has changed by pulling down the
+    // Session API cookie.
+    if (isset($_COOKIE['session_api_session']) && $_COOKIE['session_api_session'] != session_id()) {
+      // Check if this sid exists.
+      $sid = db_result(db_query("SELECT sid FROM {session_api} WHERE session_id = '%s'", array(':session_id' => $_COOKIE['session_api_session'])));
+    }
+
+    if ($sid) {
+      // Update with new session ID.
+      $rec = new stdClass;
+      $rec->sid = $sid;
+      $rec->session_id = session_id();
+      drupal_write_record('session_api', $rec, 'sid');
+      setcookie('session_api_session', session_id(), time() + variable_get('session_api_cookie_expire_time', 2592000));
+    }
+    else {
+      // Secondly, check if id exists in db.
+      $sid = db_result(db_query("SELECT sid FROM {session_api} WHERE session_id = '%s'", array(':session_id' => session_id())));
+    }
     
     if (!$sid) {
       // No sid exists, create new one.
@@ -37,6 +56,9 @@ function session_api_get_sid() {
       $rec->session_id = session_id();
       drupal_write_record('session_api', $rec);
       $sid = $rec->sid;
+
+      // Set cookie.
+      setcookie('session_api_session', session_id(), time() + variable_get('session_api_cookie_expire_time', 2592000));
     }
       
     $_SESSION['session_api_id'] = $sid;
@@ -73,41 +95,6 @@ function session_api_cron() {
   if (!empty($outdated_sids)) {
     module_invoke_all('session_api_cleanup', $outdated_sids);
     db_query('DELETE FROM {session_api} WHERE sid IN (' . implode(',', $outdated_sids) . ')');
-  }
-}
-
-/**
- * Implementation of hook_session_api_cleanup().
- *
- * A self implementation of the Session API cleanup hook. Generally called
- * from session_api_cron().
- *
- * @param string $op
- *   The operation the function perform.
- *    * run  - perform the cleanup
- *    * info - provide information(in the form of a keyed array) of the title
- *             and description of the cleanup.
- * @return
- *   Varies with $op.
- *   * run - NULL
- *   * info - a keyed array containing title and description
- */
-function session_api_session_api_cleanup($op = 'run') {
-  switch ($op) {
-    case 'info':
-      return array(
-        'title' => t('Clear expired <strong>Session API</strong> sessions'),
-        'description' => t('Clear out old <strong>Session API</strong> IDs for which the corresponding <a href="!php">PHP session</a> no longer exists. <br /><strong>Important</strong>: This option must be checked for any of the subsequent cleanup processes to work. Unchecking this will disable any removal of expired session data.', array('!php' => url('http://php.net/manual/en/book.session.php'))),
-      );
-
-    case 'run':
-    default:
-      // Fetch list of outdated sids.
-      $result = db_query("SELECT sap.sid FROM {session_api} sap LEFT JOIN {sessions} s ON (sap.session_id = s.sid) WHERE s.sid IS NULL");
-      while ($session = db_fetch_object($result)) {
-       // Remove the session api id.
-        db_query("DELETE FROM {session_api} WHERE sid = %d", $session->sid);
-      }
   }
 }
 

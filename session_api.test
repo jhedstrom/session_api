@@ -19,6 +19,10 @@ class SessionApiTestCase extends DrupalWebTestCase {
     );
   }
 
+  function setUp() {
+    parent::setUp('session_api');
+  }
+
   /**
    * Verify functions.
    */
@@ -26,7 +30,9 @@ class SessionApiTestCase extends DrupalWebTestCase {
     module_load_include('module', 'session_api');
     // Capture existing values, which are restored at the end of this function.
     $old_cookie = $_COOKIE;
-    $old_session_api_id = $_SESSION['session_api_id'];
+    if (isset($_SESSION['session_api_id'])) {
+      $old_session_api_id = $_SESSION['session_api_id'];
+    }
     $old_sid = session_id();
 
     // session_api_available();
@@ -52,7 +58,9 @@ class SessionApiTestCase extends DrupalWebTestCase {
 
     // Restore pre-testing values.
     $_COOKIE = $old_cookie;
-    $_SESSION['session_api_id'] = $old_session_api_id;
+    if (isset($old_session_api_id)) {
+      $_SESSION['session_api_id'] = $old_session_api_id;
+    }
     db_query("DELETE FROM {session_api} WHERE session_id = '%s'", session_id());
     session_id($old_sid);
   }
