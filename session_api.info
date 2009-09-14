@@ -1,4 +1,8 @@
 ; $Id: session_api.info,v 1.1 2008/07/01 18:21:30 jhedstrom Exp $
 name = Session API
 description = Provides an interface for storing session information.
-core = 6.x
+core = 7.x
+files[] = session_api.module
+files[] = session_api.admin.inc
+files[] = session_api.install
+files[] = session_api.test

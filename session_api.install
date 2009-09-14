@@ -3,21 +3,7 @@
 // $Id: session_api.install,v 1.1.2.1 2009/02/25 00:54:48 jhedstrom Exp $
 
 /**
- * Implementation of hook_install().
- */
-function session_api_install() {
-  drupal_install_schema('session_api');
-}
-
-/**
- * Implementation of hook_uninstall().
- */
-function session_api_uninstall() {
-  drupal_uninstall_schema('session_api');
-}
-
-/**
- * Implementation of hook_schema().
+ * Implement hook_schema().
  */
 function session_api_schema() {
   $schema['session_api'] = array(

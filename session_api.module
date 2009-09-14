@@ -67,12 +67,12 @@ function session_api_get_sid() {
 }
 
 /**
- * Implementation of hook_menu().
+ * Implement hook_menu().
  */
 function session_api_menu() {
-  $items['admin/settings/session-api'] = array(
+  $items['admin/config/development/session-api'] = array(
     'title' => t('Session API Configuration'),
-    'description' => t('Configure Session API behavior'),
+    'description' => t('Configure Session API behavior.'),
     'access arguments' => array('administer site configuration'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('session_api_settings_form'),
@@ -83,7 +83,7 @@ function session_api_menu() {
 }
 
 /**
- * Implementation of hook_cron().
+ * Implement hook_cron().
  */
 function session_api_cron() {
   // Fetch list of outdated sids.
@@ -96,14 +96,4 @@ function session_api_cron() {
     module_invoke_all('session_api_cleanup', $outdated_sids);
     db_query('DELETE FROM {session_api} WHERE sid IN (' . implode(',', $outdated_sids) . ')');
   }
-}
-
-/**
- * Implementation of hook_simpletest().
- */
-function session_api_simpletest() {
-  $module_name = 'session_api';
-  $dir = drupal_get_path('module', $module_name) .'/tests';
-  $tests = file_scan_directory($dir, '\.test$');
-  return array_keys($tests);
 }

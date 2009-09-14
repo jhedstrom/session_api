@@ -11,14 +11,20 @@
  * Session API SimpleTest class
  */
 class SessionApiTestCase extends DrupalWebTestCase {
-  function getInfo() {
+  /**
+   * Implement getInfo().
+   */
+  public static function getInfo() {
     return array(
-      'name' => t('Session API tests'),
-      'description' => t('Tests various Session API functions'),
-      'group' => t('Session API'),
+      'name' => 'Session API tests',
+      'description' => 'Tests various Session API functions',
+      'group' => 'Session API',
     );
   }
 
+  /**
+   * Implement setUp().
+   */
   function setUp() {
     parent::setUp('session_api');
   }
